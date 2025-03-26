@@ -6,9 +6,13 @@ import { User } from "../models/user.model";
 import { decrypt, encrypt } from "../utils/encryption";
 import { Session } from "../models/session.model";
 import { deleteCache, getCache, setCache } from "../utils/redis/cache";
-const { nanoid } = require("nanoid/async");
 
 const authService = new AuthService();
+
+const nanoid = async () => {
+  const { nanoid } = await import("nanoid");
+  return nanoid();
+};
 
 export class AuthController {
   async signup(request: FastifyRequest, reply: FastifyReply): Promise<void> {
@@ -42,7 +46,7 @@ export class AuthController {
       const user = await authService.verifyMagicLink(token);
       if (!user) return reply.code(400).send({ message: "Invalid token" });
 
-      const sessionId = encrypt(nanoid());
+      const sessionId = encrypt(await nanoid());
       const expiresAt = new Date(Date.now() + 86400 * 1000);
 
       const ipAddress =
@@ -143,7 +147,7 @@ export class AuthController {
         return reply.code(400).send({ message: "Invalid or expired OTP." });
       }
 
-      const sessionId = encrypt(nanoid());
+      const sessionId = encrypt(await nanoid());
       const expiresAt = new Date(Date.now() + 86400 * 1000); // 24-hour expiration
 
       const ipAddress =
