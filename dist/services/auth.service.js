@@ -23,12 +23,12 @@ class AuthService {
      * Sends a magic link email for first-time signup.
      * The magic token is stored in Redis with a TTL.
      */
-    sendMagicLink(email) {
+    sendMagicLink(email, name, phone_number) {
         return __awaiter(this, void 0, void 0, function* () {
             const token = (0, crypto_util_1.generateToken)();
             const key = `magicToken:${token}`;
             // Store the magic token in Redis with TTL (in seconds)
-            yield (0, cache_1.setCache)(key, email, config_1.default.magicLink.ttl);
+            yield (0, cache_1.setCache)(key, { email, name, phone_number }, config_1.default.magicLink.ttl);
             const link = `${config_1.default.app.baseUrl}/auth/magic?token=${token}`;
             yield (0, email_service_1.sendMagicLinkEmail)(email, link);
         });
@@ -48,7 +48,7 @@ class AuthService {
             // Find or create a user record in MongoDB
             let user = yield user_model_1.User.findOne({ email });
             if (!user) {
-                user = new user_model_1.User({ name: 'New User', email, isVerified: true });
+                user = new user_model_1.User({ name: "New User", email, isVerified: true });
                 yield user.save();
             }
             else {
@@ -88,7 +88,7 @@ class AuthService {
             yield (0, cache_1.deleteCache)(key);
             // Find the user in MongoDB
             const user = yield user_model_1.User.findOne({ email });
-            console.log('user', user);
+            console.log("user", user);
             return user;
         });
     }

@@ -51,7 +51,7 @@ function sendEmail(to, subject, htmlBody) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const mailOptions = {
-                from: `"NxtGenAiDev" <${config_1.default.email.user}>`,
+                from: `"No-Reply@Voya" <${config_1.default.email.user}>`,
                 to,
                 subject,
                 html: htmlBody

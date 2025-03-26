@@ -77,5 +77,5 @@ exports.app.setErrorHandler((error, request, reply) => {
 });
 exports.app.get("/", (request, reply) => __awaiter(void 0, void 0, void 0, function* () {
     logger_1.default.info("Root route accessed");
-    return { message: "Next Gen Ai Dev Server" };
+    return { message: "Travel Ai Auth Server" };
 }));

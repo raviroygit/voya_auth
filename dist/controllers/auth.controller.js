@@ -23,12 +23,12 @@ class AuthController {
     signup(request, reply) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { email } = request.body;
+                const { email, name, phone_number } = request.body;
                 const user = yield user_model_1.User.findOne({ email });
                 if (user) {
                     return (0, next_1.next)(reply, new ErrorHandler_1.Errorhandler("User already exist with email: " + email, 500));
                 }
-                yield authService.sendMagicLink(email);
+                yield authService.sendMagicLink(email, name, phone_number);
                 reply.send({ message: "Magic link sent. Please check your email." });
             }
             catch (err) {
@@ -40,6 +40,7 @@ class AuthController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { token } = request.query;
+                console.log("token", token);
                 const user = yield authService.verifyMagicLink(token);
                 if (!user)
                     return reply.code(400).send({ message: "Invalid token" });
@@ -153,7 +154,7 @@ class AuthController {
                     path: "/",
                     maxAge: 86400, // ✅ Keeps cookie after refresh (24 hours)
                 })
-                    .send({ message: "Logged in successfully" });
+                    .send({ message: "Logged in successfully", token: sessionId });
             }
             catch (err) {
                 return (0, next_1.next)(reply, new ErrorHandler_1.Errorhandler(err.message, 500));
@@ -163,7 +164,12 @@ class AuthController {
     getMe(request, reply) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { sso_token } = request.cookies;
+                const authHeader = request.headers.authorization;
+                if (!authHeader || !authHeader.startsWith("Bearer ")) {
+                    return reply.code(401).send({ message: "Unauthorized" });
+                }
+                // Remove "Bearer " prefix to get the actual token
+                const sso_token = authHeader.split(" ")[1];
                 if (!sso_token)
                     return reply.code(401).send({ message: "Not authenticated" });
                 let userId = (0, encryption_1.decrypt)(yield (0, cache_1.getCache)(`session:${sso_token}`));
@@ -196,7 +202,8 @@ class AuthController {
                         maxAge: 86400, // ✅ Extends the cookie expiration
                     });
                 }
-                reply.send({ userId });
+                const user = yield user_model_1.User.findOne({ _id: userId });
+                reply.send({ user, token: sso_token });
             }
             catch (err) {
                 console.log("err", err);
