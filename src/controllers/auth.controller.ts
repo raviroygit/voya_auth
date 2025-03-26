@@ -6,6 +6,7 @@ import { User } from "../models/user.model";
 import { decrypt, encrypt } from "../utils/encryption";
 import { Session } from "../models/session.model";
 import { deleteCache, getCache, setCache } from "../utils/redis/cache";
+import { Types } from "mongoose";
 
 const authService = new AuthService();
 
@@ -31,6 +32,40 @@ export class AuthController {
       }
       await authService.sendMagicLink(email, name, phone_number);
       reply.send({ message: "Magic link sent. Please check your email." });
+    } catch (err: any) {
+      return next(reply, new Errorhandler(err.message, 500));
+    }
+  }
+
+  async updateUser(
+    request: FastifyRequest,
+    reply: FastifyReply
+  ): Promise<void> {
+    try {
+      const { user }: any = request;
+      console.log('user', user)
+      if (!user || !user._id) {
+        return reply.code(400).send({ message: "User not authenticated" });
+      }
+
+      const userId = new Types.ObjectId(user._id);
+
+      const { name, phone_number } = request.body as {
+        name?: string;
+        phone_number?: string;
+      };
+
+      const existingUser = await User.findById(userId);
+      if (!existingUser) {
+        return reply.code(404).send({ message: "User not found" });
+      }
+
+      if (name) existingUser.name = name;
+      if (phone_number) existingUser.phone_number = phone_number;
+
+      await existingUser.save();
+
+      reply.send({ message: "User updated successfully", user: existingUser });
     } catch (err: any) {
       return next(reply, new Errorhandler(err.message, 500));
     }
