@@ -50,6 +50,7 @@ const user_model_1 = require("../models/user.model");
 const encryption_1 = require("../utils/encryption");
 const session_model_1 = require("../models/session.model");
 const cache_1 = require("../utils/redis/cache");
+const mongoose_1 = require("mongoose");
 const authService = new auth_service_1.AuthService();
 const nanoid = () => __awaiter(void 0, void 0, void 0, function* () {
     const { nanoid } = yield Promise.resolve().then(() => __importStar(require("nanoid")));
@@ -66,6 +67,32 @@ class AuthController {
                 }
                 yield authService.sendMagicLink(email, name, phone_number);
                 reply.send({ message: "Magic link sent. Please check your email." });
+            }
+            catch (err) {
+                return (0, next_1.next)(reply, new ErrorHandler_1.Errorhandler(err.message, 500));
+            }
+        });
+    }
+    updateUser(request, reply) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { user } = request;
+                console.log('user', user);
+                if (!user || !user._id) {
+                    return reply.code(400).send({ message: "User not authenticated" });
+                }
+                const userId = new mongoose_1.Types.ObjectId(user._id);
+                const { name, phone_number } = request.body;
+                const existingUser = yield user_model_1.User.findById(userId);
+                if (!existingUser) {
+                    return reply.code(404).send({ message: "User not found" });
+                }
+                if (name)
+                    existingUser.name = name;
+                if (phone_number)
+                    existingUser.phone_number = phone_number;
+                yield existingUser.save();
+                reply.send({ message: "User updated successfully", user: existingUser });
             }
             catch (err) {
                 return (0, next_1.next)(reply, new ErrorHandler_1.Errorhandler(err.message, 500));

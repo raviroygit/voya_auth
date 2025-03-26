@@ -11,11 +11,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.authRoutes = authRoutes;
 const auth_controller_1 = require("../controllers/auth.controller");
+const auth_1 = require("../middlewares/auth");
 function authRoutes(fastify) {
     return __awaiter(this, void 0, void 0, function* () {
         const controller = new auth_controller_1.AuthController();
         // Signup (magic link)
         fastify.post("/signup", controller.signup.bind(controller));
+        fastify.put("/user", { preHandler: auth_1.authMiddleware }, controller.updateUser.bind(controller));
         // Verify magic link
         fastify.get("/magic", controller.verifyMagic.bind(controller));
         // Request OTP for login
