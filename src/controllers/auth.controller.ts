@@ -6,7 +6,7 @@ import { User } from "../models/user.model";
 import { decrypt, encrypt } from "../utils/encryption";
 import { Session } from "../models/session.model";
 import { deleteCache, getCache, setCache } from "../utils/redis/cache";
-import { nanoid } from "nanoid";
+const { nanoid } = require("nanoid/async");
 
 const authService = new AuthService();
 

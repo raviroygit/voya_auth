@@ -17,7 +17,7 @@ const user_model_1 = require("../models/user.model");
 const encryption_1 = require("../utils/encryption");
 const session_model_1 = require("../models/session.model");
 const cache_1 = require("../utils/redis/cache");
-const nanoid_1 = require("nanoid");
+const { nanoid } = require("nanoid/async");
 const authService = new auth_service_1.AuthService();
 class AuthController {
     signup(request, reply) {
@@ -44,7 +44,7 @@ class AuthController {
                 const user = yield authService.verifyMagicLink(token);
                 if (!user)
                     return reply.code(400).send({ message: "Invalid token" });
-                const sessionId = (0, encryption_1.encrypt)((0, nanoid_1.nanoid)());
+                const sessionId = (0, encryption_1.encrypt)(nanoid());
                 const expiresAt = new Date(Date.now() + 86400 * 1000);
                 const ipAddress = request.ip || request.headers["x-forwarded-for"] || "Unknown";
                 const userAgent = request.headers["user-agent"] || "Unknown";
@@ -132,7 +132,7 @@ class AuthController {
                 if (!user) {
                     return reply.code(400).send({ message: "Invalid or expired OTP." });
                 }
-                const sessionId = (0, encryption_1.encrypt)((0, nanoid_1.nanoid)());
+                const sessionId = (0, encryption_1.encrypt)(nanoid());
                 const expiresAt = new Date(Date.now() + 86400 * 1000); // 24-hour expiration
                 const ipAddress = request.ip || request.headers["x-forwarded-for"] || "Unknown";
                 const userAgent = request.headers["user-agent"] || "Unknown";
