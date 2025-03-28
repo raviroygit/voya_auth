@@ -29,7 +29,8 @@ export const fastifyInstance = app;
 
 const allowedOrigins = [
     process.env.ORIGIN1,
-    process.env.ORIGIN2
+    process.env.ORIGIN2,
+    process.env.ORIGIN3
 ];
 
 app.register(cors, {
