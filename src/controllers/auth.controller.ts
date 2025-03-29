@@ -43,7 +43,7 @@ export class AuthController {
   ): Promise<void> {
     try {
       const { user }: any = request;
-      console.log('user', user)
+      console.log("user", user);
       if (!user || !user._id) {
         return reply.code(400).send({ message: "User not authenticated" });
       }
@@ -77,7 +77,6 @@ export class AuthController {
   ): Promise<void> {
     try {
       const { token } = request.query as { token: string };
-      console.log("token", token);
       const user = await authService.verifyMagicLink(token);
       if (!user) return reply.code(400).send({ message: "Invalid token" });
 
@@ -111,6 +110,7 @@ export class AuthController {
         })
         .send({ message: "Logged in", ipAddress, userAgent });
     } catch (err) {
+      console.log("err", err);
       reply.code(500).send({ message: "Server error" });
     }
   }

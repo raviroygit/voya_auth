@@ -29,7 +29,8 @@ export class AuthService {
    */
   async verifyMagicLink(token: string): Promise<IUser | null> {
     const key = `magicToken:${token}`;
-    const email = await getCache(key);
+    const userData = await getCache(key);
+    const email = userData?.email;
     if (!email) return null;
 
     // Invalidate the token once it is used
@@ -38,7 +39,7 @@ export class AuthService {
     // Find or create a user record in MongoDB
     let user = await User.findOne({ email });
     if (!user) {
-      user = new User({ name: "New User", email, isVerified: true });
+      user = new User({ ...userData, isVerified: true });
       await user.save();
     } else {
       // Update the user as verified if necessary
